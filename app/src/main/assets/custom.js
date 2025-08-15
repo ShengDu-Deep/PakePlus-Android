@@ -1,26 +1,596 @@
-//console.log(
-//    '%cbuild from PakePlus： https://github.com/Sjj1024/PakePlus',
-//    'color:orangered;font-weight:bolder'
-//)
-//
-//// very important, if you don't know what it is, don't touch it
-//// 非常重要，不懂代码不要动
-//const hookClick = (e) => {
-//    const origin = e.target.closest('a')
-//    const isBaseTargetBlank = document.querySelector(
-//        'head base[target="_blank"]'
-//    )
-//    console.log('origin', origin, isBaseTargetBlank)
-//    if (
-//        (origin && origin.href && origin.target === '_blank') ||
-//        (origin && origin.href && isBaseTargetBlank)
-//    ) {
-//        e.preventDefault()
-//        console.log('handle origin', origin)
-//        location.href = origin.href
-//    } else {
-//        console.log('not handle origin', origin)
-//    }
-//}
-//
-//document.addEventListener('click', hookClick, { capture: true })
+console.log(
+    '%cbuild from PakePlus： https://github.com/Sjj1024/PakePlus',
+    'color:orangered;font-weight:bolder'
+)
+
+// very important, if you don't know what it is, don't touch it
+const hookClick = (e) => {
+    const origin = e.target.closest('a')
+    const isBaseTargetBlank = document.querySelector(
+        'head base[target="_blank"]'
+    )
+    console.log('origin', origin, isBaseTargetBlank)
+    if (
+        (origin && origin.href && origin.target === '_blank') ||
+        (origin && origin.href && isBaseTargetBlank)
+    ) {
+        e.preventDefault()
+        console.log('handle origin', origin)
+        location.href = origin.href
+    } else {
+        console.log('not handle origin', origin)
+    }
+}
+
+window.open = function (url, target, features) {
+    console.log('open', url, target, features)
+    location.href = url
+}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心跳校园 | 恋爱选择</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#7C3AED',
+                        secondary: '#EC4899',
+                        neutral: '#1F2937',
+                        light: '#F9FAFB'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .bg-blur {
+                backdrop-filter: blur(8px);
+            }
+            .transition-all-300 {
+                transition: all 300ms ease-in-out;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-900 to-indigo-900 min-h-screen text-light font-sans overflow-x-hidden">
+    <!-- 游戏容器 -->
+    <div class="max-w-md mx-auto p-4 relative">
+        <!-- 标题 -->
+        <div class="text-center mb-6">
+            <h1 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-white text-shadow">心跳校园</h1>
+            <p class="text-purple-200 text-sm">每一次选择，都通往不同的未来</p>
+        </div>
+
+        <!-- 好感度指示器 -->
+        <div class="flex justify-between mb-4 p-3 bg-black/30 rounded-lg bg-blur">
+            <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-pink-500 flex items-center justify-center mr-2">
+                    <<i class="fa fa-female text-white"></</i>
+                </div>
+                <div>
+                    <p class="text-xs text-pink-200">林薇</p>
+                    <div class="w-24 h-2 bg-gray-600 rounded-full overflow-hidden">
+                        <div id="linwei-affinity" class="h-full bg-pink-500 w-[0%] transition-all duration-500"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center mr-2">
+                    <<i class="fa fa-male text-white"></</i>
+                </div>
+                <div>
+                    <p class="text-xs text-blue-200">陈宇</p>
+                    <div class="w-24 h-2 bg-gray-600 rounded-full overflow-hidden">
+                        <div id="chenyu-affinity" class="h-full bg-blue-500 w-[0%] transition-all duration-500"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 剧情显示区 -->
+        <div class="bg-black/40 rounded-xl p-6 mb-6 min-h-[300px] flex flex-col justify-end bg-blur relative overflow-hidden">
+            <!-- 背景装饰 -->
+            <div class="absolute top-0 left-0 w-full h-full opacity-10">
+                <<i class="fa fa-heart absolute top-10 left-10 text-6xl text-pink-500"></</i>
+                <<i class="fa fa-book absolute bottom-10 right-10 text-6xl text-blue-500"></</i>
+                <<i class="fa fa-tree absolute top-40 right-20 text-6xl text-green-500"></</i>
+            </div>
+            
+            <!-- 角色头像 -->
+            <div id="character-avatar" class="absolute top-4 left-4 w-12 h-12 rounded-full hidden items-center justify-center text-white text-xl border-2 border-white">
+                <!-- 动态填充 -->
+            </div>
+            
+            <!-- 剧情文本 -->
+            <div id="story-text" class="relative z-10 leading-relaxed text-lg">
+                九月的风带着夏末的余温，吹拂着青藤覆盖的教学楼。作为转学生，今天是你在星华高中的第一天。站在喧闹的校门口，你有些紧张地攥紧了书包带。突然，两个身影同时映入眼帘...
+            </div>
+        </div>
+
+        <!-- 选项按钮区 -->
+        <div id="choices-container" class="flex flex-col gap-3">
+            <button class="choice-btn bg-pink-600 hover:bg-pink-700 text-white py-4 px-6 rounded-lg text-left transition-all-300 transform hover:scale-[1.02] active:scale-[0.98]" data-next="2" data-affinity="linwei" data-value="20">
+                向那个穿着白色连衣裙、正对着公告栏微笑的女生走去
+            </button>
+            <button class="choice-btn bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-lg text-left transition-all-300 transform hover:scale-[1.02] active:scale-[0.98]" data-next="3" data-affinity="chenyu" data-value="20">
+                走向那个靠在樱花树下、安静看书的男生
+            </button>
+        </div>
+
+        <!-- 重置按钮 -->
+        <button id="reset-btn" class="mt-6 w-full py-2 text-sm text-purple-200 hover:text-white bg-transparent border border-purple-500/50 rounded-lg transition-all-300">
+            重新开始
+        </button>
+    </div>
+
+    <script>
+        // 游戏状态
+        const gameState = {
+            currentNode: 1,
+            affinity: {
+                linwei: 0,
+                chenyu: 0
+            }
+        };
+
+        // 剧情节点数据
+        const storyNodes = {
+            1: {
+                text: "九月的风带着夏末的余温，吹拂着青藤覆盖的教学楼。作为转学生，今天是你在星华高中的第一天。站在喧闹的校门口，你有些紧张地攥紧了书包带。突然，两个身影同时映入眼帘...",
+                choices: [
+                    { text: "向那个穿着白色连衣裙、正对着公告栏微笑的女生走去", next: 2, affinity: "linwei", value: 20 },
+                    { text: "走向那个靠在樱花树下、安静看书的男生", next: 3, affinity: "chenyu", value: 20 }
+                ],
+                avatar: null
+            },
+            2: {
+                text: "你走到女生身边，她似乎察觉到了你的目光，转过头对你露出一个明亮的笑容：「嗨，你是新来的转学生吗？我叫林薇，高二（3）班的。需要帮忙吗？」她的眼睛像盛满了阳光，让你紧张感消散了不少。",
+                choices: [
+                    { text: "「谢谢你，我确实有点迷路...」（接受帮助）", next: 4, affinity: "linwei", value: 15 },
+                    { text: "「谢谢，不过我想先自己逛逛熟悉一下」（礼貌拒绝）", next: 5, affinity: "linwei", value: 5 }
+                ],
+                avatar: '<<i class="fa fa-female"></</i>',
+                avatarColor: "bg-pink-500"
+            },
+            3: {
+                text: "你走向樱花树下的男生。他似乎沉浸在书的世界里，直到你走近才抬起头，眼神清澈而平静：「有事吗？」他的声音低沉悦耳，带着一丝疏离感，但并不让人反感。",
+                choices: [
+                    { text: "「你好，我是转学生，想问下教务处怎么走」", next: 6, affinity: "chenyu", value: 15 },
+                    { text: "「抱歉打扰了，我看你在读的这本书...」（讨论书籍）", next: 7, affinity: "chenyu", value: 20 }
+                ],
+                avatar: '<<i class="fa fa-male"></</i>',
+                avatarColor: "bg-blue-500"
+            },
+            4: {
+                text: "林薇眼睛一亮：「没问题！我正好要回教室，顺路带你去教务处登记。」一路上她热情地向你介绍学校的各个建筑和有趣的社团，她的笑声像风铃一样清脆。登记完后，她递给你一张手绘的校园地图：「这是我画的，标了很多好吃的地方哦！」",
+                choices: [
+                    { text: "「太感谢了！中午有空吗？我请你吃饭吧」", next: 8, affinity: "linwei", value: 25 },
+                    { text: "「非常感谢你的帮助」（收下地图，礼貌道别）", next: 9, affinity: "linwei", value: 10 }
+                ],
+                avatar: '<<i class="fa fa-female"></</i>',
+                avatarColor: "bg-pink-500"
+            },
+            5: {
+                text: "林薇理解地笑了笑：「没关系，慢慢逛吧。对了，这是我的联系方式，如果迷路了可以找我哦」她递给你一张写着名字和手机号的便签。「我在高二（3）班，说不定我们是同班呢！」",
+                choices: [
+                    { text: "「好的，非常感谢你」（收下便签）", next: 10, affinity: "linwei", value: 15 },
+                    { text: "「谢谢，不过应该不会迷路的」（婉拒便签）", next: 11, affinity: "linwei", value: 5 }
+                ],
+                avatar: '<<i class="fa fa-female"></</i>',
+                avatarColor: "bg-pink-500"
+            },
+            6: {
+                text: "男生合上书，简洁地说：「跟我来。」一路上他话不多，但会适时提醒你一些注意事项。到达教务处后，他转身准备离开。",
+                choices: [
+                    { text: "「还没问你的名字呢？」（主动询问）", next: 12, affinity: "chenyu", value: 15 },
+                    { text: "「谢谢你的带路」（直接道别）", next: 13, affinity: "chenyu", value: 5 }
+                ],
+                avatar: '<<i class="fa fa-male"></</i>',
+                avatarColor: "bg-blue-500"
+            },
+            7: {
+                text: "听到你提到书，他眼中闪过一丝意外，随即柔和了许多：「你也喜欢这本？」你们聊起了书的内容，发现彼此有很多共同话题。他似乎对你放下了些许防备：「我叫陈宇。」",
+                choices: [
+                    { text: "「我叫XXX，很高兴认识你」（分享自己的名字）", next: 14, affinity: "chenyu", value: 25 },
+                    { text: "「这本书确实很精彩，谢谢你的推荐」（继续讨论书籍）", next: 15, affinity: "chenyu", value: 20 }
+                ],
+                avatar: '<<i class="fa fa-male"></</i>',
+                avatarColor: "bg-blue-500"
+            },
+            8: {
+                text: "林薇惊喜地答应了：「好呀！中午食堂见！」上午的开学典礼后，你在高二（3）班的座位坐下，惊讶地发现林薇就坐在你的前桌。她回头对你做了个鬼脸，让你觉得这个新班级似乎也没那么可怕。（林薇好感度大幅提升）",
+                choices: [
+                    { text: "午休时主动去找林薇", next: 16, affinity: "linwei", value: 20 },
+                    { text: "等待林薇来找自己", next: 17, affinity: "linwei", value: 10 }
+                ],
+                avatar: '<<i class="fa fa-female"></</i>',
+                avatarColor: "bg-pink-500"
+            },
+            9: {
+                text: "林薇笑着挥手道别：「有事可以来3班找我哦！」你走进教学楼，在公告栏前查找分班信息，发现自己被分到了高二（3）班。当你走进教室，看到林薇正坐在窗边向你招手。",
+                choices: [
+                    { text: "坐到林薇旁边的空位", next: 18, affinity: "linwei", value: 15 },
+                    { text: "找一个远离她的座位", next: 19, affinity: "linwei", value: 5 }
+                ],
+                avatar: '<<i class="fa fa-female"></</i>',
+                avatarColor: "bg-pink-500"
+            },
+            10: {
+                text: "你收下便签，注意到上面还有个可爱的小插画。逛了一会儿校园，你来到公告栏查看分班信息，发现自己在高二（3）班。走进教室时，林薇看到你眼睛一亮，向你招手：「这边有空位！」",
+                choices: [
+                    { text: "走过去坐到她旁边", next: 20, affinity: "linwei", value: 15 },
+                    { text: "点头示意，坐到另一边", next: 21, affinity: "linwei", value: 5 }
+                ],
+                avatar: '<<i class="fa fa-female"></</i>',
+                avatarColor: "bg-pink-500"
+            },
+            11: {
+                text: "林薇愣了一下，随即恢复笑容：「好吧，那祝你好运！」你独自逛了校园，在公告栏看到自己被分到高二（3）班。走进教室，你发现林薇也在这个班，她看到你时有些惊讶，但只是点了点头。",
+                choices: [
+                    { text: "主动走过去打招呼", next: 22, affinity: "linwei", value: 10 },
+                    { text: "默默找个座位坐下", next: 23, affinity: "chenyu", value: 10 }
+                ],
+                avatar: null
+            },
+            12: {
+                text: "他停下脚步，回头看了你一眼：「陈宇。」说完便转身离开。你登记完后来到高二（3）班，刚坐下就看到陈宇走进教室，坐在了你斜后方的位置。",
+                choices: [
+                    { text: "回头对他点头示意", next: 24, affinity: "chenyu", value: 10 },
+                    { text: "专注于整理自己的东西", next: 25, affinity: "chenyu", value: 5 }
+                ],
+                avatar: '<<i class="fa fa-male"></</i>',
+                avatarColor: "bg-blue-500"
+            },
+            13: {
+                text: "他微微点头，转身离开。你登记完后来到高二（3）班，发现教室里已经坐了不少人。当你找到空位坐下时，发现旁边的座位空着。过了一会儿，陈宇走了进来，坐在了你旁边。",
+                choices: [
+                    { text: "「又见面了，我是XXX」（主动打招呼）", next: 26, affinity: "chenyu", value: 15 },
+                    { text: "保持沉默，继续看书", next: 27, affinity: "chenyu", value: 5 }
+                ],
+                avatar: '<<i class="fa fa-male"></</i>',
+                avatarColor: "bg-blue-500"
+            },
+            14: {
+                text: "陈宇点了点头：「我记住了。」你们又聊了一会儿，直到上课铃快响了才分开。你来到高二（3）班，惊讶地发现陈宇就坐在你的斜前方。他看到你时，难得地主动点了点头。",
+                choices: [
+                    { text: "走过去和他聊几句", next: 28, affinity: "chenyu", value: 20 },
+                    { text: "先坐到自己的座位上", next: 29, affinity: "chenyu", value: 10 }
+                ],
+                avatar: '<<i class="fa fa-male"></</i>',
+                avatarColor: "bg-blue-500"
+            },
+            15: {
+                text: "你们又讨论了几个章节，陈宇的话渐渐多了起来。上课铃响时，他对你说：「我在3班，说不定我们同班。」你来到高二（3）班，果然看到了陈宇的身影。",
+                choices: [
+                    { text: "坐到他旁边的空位
+，next: 30, affinity: "chenyu", value: 20 },
+{ text: "找另一个空位坐下", next: 31, affinity: "chenyu", value: 10 }
+],
+avatar: '<</',
+avatarColor: "bg-blue-500"
+},
+16: {
+text: "你在食堂找到林薇时，她已经占好了位置，面前放着两份套餐。「我猜你可能不知道吃什么，就帮你点了一份招牌套餐。」她笑着说。午餐时你们聊了很多，从兴趣爱好到未来的梦想，你发现和她在一起非常轻松愉快。（林薇好感度大幅提升）",
+choices: [
+{ text: "继续与林薇的故事线", next: 32 }
+],
+avatar: '<</',
+avatarColor: "bg-pink-500"
+},
+17: {
+text: "午休铃声刚响，林薇就跑到你座位旁：「走呀，去食堂！」午餐时她兴致勃勃地给你讲学校的各种趣事，偶尔会问起你的过去。你发现自己不知不觉中笑了很多次。（林薇好感度达到45+）",
+choices: [
+{ text: "继续与林薇的故事线", next: 33 }
+],
+avatar: '<</',
+avatarColor: "bg-pink-500"
+},
+18: {
+text: "你坐到林薇旁边，她立刻拿出课本帮你标记重点。「我们班的数学老师有点严格，这个是重点哦。」整个上午的课程，她都悄悄帮你解答疑问。放学时，她对你说：「明天一起上学吧？我知道一条超美的小路！」（林薇好感度达到40+）",
+choices: [
+{ text: "答应林薇的邀请", next: 34, affinity: "linwei", value: 15 },
+{ text: "委婉拒绝", next: 35, affinity: "linwei", value: 5 }
+],
+avatar: '<</',
+avatarColor: "bg-pink-500"
+},
+19: {
+text: "你选了教室后排的空位坐下，林薇回头看了一眼，眼神里有些失落，但很快又转了回去。上课时，你发现她总会悄悄把笔记往你这边推一点。午休时，她犹豫了很久，还是走过来问：「要不要一起去食堂？」",
+choices: [
+{ text: "「好啊，正好想去看看食堂」", next: 36, affinity: "linwei", value: 15 },
+{ text: "「不了，我带了便当」", next: 37, affinity: "linwei", value: 5 }
+],
+avatar: '<</',
+avatarColor: "bg-pink-500"
+},
+20: {
+text: "你走到林薇旁边坐下，她开心地把桌子往你这边挪了挪：「太好了！我们是同桌呢！」上课时她会用小纸条给你画老师的漫画，下课时拉着你认识班里的同学。放学时，她塞给你一颗糖：「明天见呀！」",
+choices: [
+{ text: "回赠她一块巧克力", next: 38, affinity: "linwei", value: 20 },
+{ text: "笑着说谢谢", next: 39, affinity: "linwei", value: 10 }
+],
+avatar: '<</',
+avatarColor: "bg-pink-500"
+},
+21: {
+text: "你选了靠窗的空位，林薇脸上的笑容淡了些，但还是挥了挥手。上课铃响后，班主任进来安排座位，偏偏把你调到了林薇旁边。她低着头憋笑，用笔戳了戳你的胳膊：「看来我们注定要当同桌呀」",
+choices: [
+{ text: "「是挺巧的」（配合她的玩笑）", next: 40, affinity: "linwei", value: 15 },
+{ text: "默默拿出课本", next: 41, affinity: "linwei", value: 5 }
+],
+avatar: '<</',
+avatarColor: "bg-pink-500"
+},
+22: {
+text: "你走到林薇座位旁：「又见面了。」她惊喜地抬起头：「你也在这个班？太好了！」她拉着你坐下，开始给你介绍班里的情况。这时，后排传来一声轻咳——你注意到那里坐着一个男生（陈宇），正低头看书，手指却轻轻敲着桌面。",
+choices: [
+{ text: "继续和林薇聊天", next: 42, affinity: "linwei", value: 10 },
+{ text: "回头看一眼那个男生", next: 43, affinity: "chenyu", value: 10 }
+],
+avatar: null
+},
+23: {
+text: "你选了后排的空位坐下，刚拿出课本，旁边的男生抬头看了你一眼——正是早上在樱花树下遇到的人。「又是你。」他说，语气比早上缓和了些。「我叫陈宇。」",
+choices: [
+{ text: "「我叫XXX，很高兴认识你」", next: 44, affinity: "chenyu", value: 15 },
+{ text: "简单点头回应", next: 45, affinity: "chenyu", value: 5 }
+],
+avatar: '<</',
+avatarColor: "bg-blue-500"
+},
+24: {
+text: "你回头对陈宇点头，他愣了一下，轻轻「嗯」了一声。上课时，你发现他笔记做得极其工整，连公式都用不同颜色标注。午休时，你看到他拿出一个旧笔记本在写什么，神情专注。",
+choices: [
+{ text: "凑过去看他写什么", next: 46, affinity: "chenyu", value: 15 },
+{ text: "自己拿出书看", next: 47, affinity: "chenyu", value: 5 }
+],
+avatar: '<</',
+avatarColor: "bg-blue-500"
+},
+25: {
+text: "你专注于整理东西时，感觉有人在看你。抬头发现陈宇正快速移开目光，耳朵有点红。下午的体育课自由活动，你看到他一个人在篮球场边坐着，手里转着篮球。",
+choices: [
+{ text: "走过去问他要不要一起打球", next: 48, affinity: "chenyu", value: 15 },
+{ text: "在旁边的长椅坐下", next: 49, affinity: "chenyu", value: 5 }
+],
+avatar: '<</',
+avatarColor: "bg-blue-500"
+},
+26: {
+text: "你主动打招呼后，陈宇的眼睛亮了一下：「嗯，又见面了。」他告诉你自己是班长，有任何问题都可以找他。上课时，他会悄悄把老师的重点在你课本上标出来。放学时，他说：「校门那边人多，我知道一条近路」",
+choices: [
+{ text: "「麻烦你带路了」", next: 50, affinity: "chenyu", value: 20 },
+{ text: "「我还是走大路吧，谢谢」", next: 51, affinity: "chenyu", value: 5 }
+],
+avatar: '<</',
+avatarColor: "bg-blue-500"
+},
+27: {
+text: "你保持沉默时，陈宇时不时用余光看你。下课铃响后，他突然递过来一张纸条：「这是班里的课程表，我帮你抄了一份。」纸条上的字迹清秀工整。",
+choices: [
+{ text: "「谢谢，你的字真好看」", next: 52, affinity: "chenyu", value: 15 },
+{ text: "接过纸条说谢谢", next: 53, affinity: "chenyu", value: 5 }
+],
+avatar: '<</',
+avatarColor: "bg-blue-500"
+},
+28: {
+text: "你走到陈宇座位旁，他抬起头，眼神比早上柔和了许多。你们聊起了班里的老师和课程，你发现他虽然话少，但观点很独到。午休时，你看到他独自一人在图书馆看书，阳光透过窗户照在他身上，形成一幅安静的画面。（陈宇好感度达到60+）",
+choices: [
+{ text: "过去和他一起看书", next: 54, affinity: "chenyu", value: 15 },
+{ text: "不打扰他，自己找书看", next: 55, affinity: "chenyu", value: 5 }
+],
+avatar: '<</',
+avatarColor: "bg-blue-500"
+},
+29: {
+text: "你坐到自己的座位后，陈宇回头看了你一眼：「需要课本的话，我这里有多余的。」他从书包里拿出一本崭新的笔记本：「可以先用来记笔记。」下午的自习课，你发现他总在你遇到难题时，故意把类似的例题放在桌角。",
+choices: [
+{ text: "向他请教不会的题目", next: 56, affinity: "chenyu", value: 15 },
+{ text: "自己尝试解决", next: 57, affinity: "chenyu", value: 5 }
+],
+avatar: '<</',
+avatarColor: "bg-blue-500"
+},
+30: {
+text: "你坐到陈宇旁边，他把桌子往旁边挪了挪，给你留出空间。上课时他会用铅笔在你不懂的地方画圈，下课时默默把老师布置的作业写在你笔记本上。放学时，他突然说：「明天早上图书馆见？我帮你借了几本参考书」",
+choices: [
+{ text: "「好，明天见」", next: 58, affinity: "chenyu", value: 20 },
+{ text: "「明天可能有点事...」", next: 59, affinity: "chenyu", value: 5 }
+],
+avatar: '<</',
+avatarColor: "bg-blue-500"
+},
+31: {
+text: "你选了前排的空位，陈宇看了一眼，没说什么。但上课时，你发现他总在回答问题时，声音比平时大一些，像是特意说给你听。午休时，他经过你座位，把一本笔记放在你桌上：「这是前几节课的重点」",
+choices: [
+{ text: "「谢谢，我看完还你」", next: 60, affinity: "chenyu", value: 15 },
+{ text: "默默收下笔记", next: 61, affinity: "chenyu", value: 5 }
+],
+avatar: '<</',
+avatarColor: "bg-blue-500"
+},
+32: {
+text: "下午的体育课上，自由活动时林薇拿着羽毛球拍来找你：「一起打球吧？」阳光洒在她跳跃的身影上，你觉得这个转校的第一天格外美好。放学后，她把自己的笔记借给了你：「有不懂的随时问我哦。」你们一起走出校门，约定了明天再见。\n\n【林薇线 初步进展达成】",
+choices: [
+{ text: "继续探索故事", next: 62 }
+],
+avatar: '<</',
+avatarColor: "bg-pink-500"
+},
+62: {
+text: "第二天一早，林薇就在校门口等你，手里拿着两个热乎乎的包子：「刚买的，还热乎呢！」你们并肩走进校园，她叽叽喳喳地讲着昨晚看的动画片，偶尔停下来问你：「你觉得我新扎的辫子好看吗？」",
+choices: [
+{ text: "「很适合你，很可爱」", next: 63, affinity: "linwei", value: 20 },
+{ text: "「挺好看的」", next: 64, affinity: "linwei", value: 10 }
+],
+avatar: '<</',
+avatarColor: "bg-pink-500"
+},
+63: {
+text: "林薇的脸颊瞬间红了，低头踢着石子：「谢...谢谢」。到了教室，你发现她在你书桌里放了一颗糖，糖纸上画着一个笑脸。下午班会课，老师说下周末要举办校园祭，需要两人一组准备摊位。林薇立刻举手：「我和XXX一组！」",
+choices: [
+{ text: "笑着点头同意", next: 65, affinity: "linwei", value: 25 },
+{ text: "虽然同意但有点害羞", next: 66, affinity: "linwei", value: 15 }
+],
+avatar: '<</',
+avatarColor: "bg-pink-500"
+},
+54: {
+text: "你走到陈宇身边，他往旁边挪了挪，给你腾出位置。你们安静地各自看书，偶尔低声讨论几句。这种无需多言的默契让你感到很舒适。放学后，他突然问你：「明天早上要一起去图书馆吗？人比较少。」\n\n【陈宇线 初步进展达成】",
+choices: [
+{ text: "继续探索故事", next: 67 }
+],
+avatar: '<</',
+avatarColor: "bg-blue-500"
+},
+67: {
+text: "第二天一早，你在图书馆门口见到了陈宇，他已经选好了几本书在等你。「这些可能对你适应新学校有帮助。」他递给你一本校园传说集和几本经典小说。阅读时，你注意到他偶尔会偷偷看你，发现你在看他时又迅速移开目光。",
+choices: [
+{ text: "「你好像经常看我？」（直接询问）", next: 68, affinity: "chenyu", value: 20 },
+{ text: "假装没发现，继续看书", next: 69, affinity: "chenyu", value: 5 }
+],
+avatar: '<</',
+avatarColor: "bg-blue-500"
+},
+68: {
+text: "陈宇的耳朵瞬间红了，合上书假装翻页：「没...没有」。但他的手指明显在颤抖。中午一起去食堂时，他破天荒地主动给你打了饭：「这个窗口的咖喱不错」。下午的体育课，他站在篮球场边，却一直看着你所在的方向。",
+choices: [
+{ text: "走过去递给他一瓶水", next: 70, affinity: "chenyu", value: 25 },
+{ text: "对他挥手示意", next: 71, affinity: "chenyu", value: 15 }
+],
+avatar: '<</',
+avatarColor: "bg-blue-500"
+},
+// 结局节点 - 林薇结局
+100: {
+text: "文化祭那天，林薇穿着漂亮的浴衣找到你，脸上带着羞涩的笑容：「其实...从你转学来的第一天起，我就喜欢你了。」在绚烂的烟花下，你们的手紧紧握在了一起。\n\n【林薇结局：夏日恋歌】",
+choices: [
+{ text: "重新开始游戏", next: 1, reset: true }
+],
+avatar: '<</',
+avatarColor: "bg-pink-500"
+},
+// 结局节点 - 陈宇结局
+101: {
+text: "在图书馆安静的角落，陈宇合上书，认真地看着你：「我不太会说好听的话，但...和你在一起的时光，很开心。」他的脸颊微微泛红，伸手轻轻握住了你的手。\n\n【陈宇结局：静谧心事】",
+choices: [
+{ text: "重新开始游戏", next: 1, reset: true }
+],
+avatar: '<</',
+avatarColor: "bg-blue-500"
+}
+};
+ 
+// 游戏状态
+const gameState = {
+currentNode: 1,
+affinity: {
+linwei: 0,
+chenyu: 0
+}
+};
+ 
+// 初始化游戏
+function initGame() {
+gameState.currentNode = 1;
+gameState.affinity.linwei = 0;
+gameState.affinity.chenyu = 0;
+updateUI();
+}
+ 
+// 更新UI显示
+function updateUI() {
+const currentNode = storyNodes[gameState.currentNode];
+const storyTextEl = document.getElementById('story-text');
+const choicesContainer = document.getElementById('choices-container');
+const avatarEl = document.getElementById('character-avatar');
+ 
+// 更新剧情文本（支持换行）
+storyTextEl.innerHTML = currentNode.text.replace(/\n/g, '
+');
+ 
+// 更新角色头像
+if (currentNode.avatar) {
+avatarEl.innerHTML = currentNode.avatar;
+avatarEl.className =  absolute top-4 left-4 w-12 h-12 rounded-full ${currentNode.avatarColor} flex items-center justify-center text-white text-xl border-2 border-white ;
+} else {
+avatarEl.className = 'hidden';
+}
+ 
+// 更新选项
+choicesContainer.innerHTML = '';
+currentNode.choices.forEach(choice => {
+const button = document.createElement('button');
+button.className =  choice-btn ${choice.affinity === 'linwei' ? 'bg-pink-600 hover:bg-pink-700' : 'bg-blue-600 hover:bg-blue-700'} text-white py-4 px-6 rounded-lg text-left transition-all-300 transform hover:scale-[1.02] active:scale-[0.98] ;
+button.textContent = choice.text;
+button.dataset.next = choice.next;
+if (choice.affinity) {
+button.dataset.affinity = choice.affinity;
+button.dataset.value = choice.value;
+}
+if (choice.reset) {
+button.dataset.reset = true;
+}
+button.addEventListener('click', handleChoice);
+choicesContainer.appendChild(button);
+});
+ 
+// 更新好感度显示
+document.getElementById('linwei-affinity').style.width =  ${gameState.affinity.linwei}% ;
+document.getElementById('chenyu-affinity').style.width =  ${gameState.affinity.chenyu}% ;
+ 
+// 自动滚动到底部
+storyTextEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
+}
+ 
+// 处理选择
+function handleChoice(e) {
+const button = e.currentTarget;
+const nextNode = parseInt(button.dataset.next);
+ 
+// 如果需要重置游戏
+if (button.dataset.reset) {
+initGame();
+return;
+}
+ 
+// 更新好感度
+if (button.dataset.affinity) {
+const affinityType = button.dataset.affinity;
+const value = parseInt(button.dataset.value);
+gameState.affinity[affinityType] = Math.min(100, gameState.affinity[affinityType] + value);
+}
+ 
+// 检查是否达到结局条件
+if (gameState.affinity.linwei >= 100) {
+gameState.currentNode = 100;
+} else if (gameState.affinity.chenyu >= 100) {
+gameState.currentNode = 101;
+} else {
+gameState.currentNode = nextNode;
+}
+ 
+// 更新UI
+updateUI();
+}
+ 
+// 重置游戏按钮
+document.getElementById('reset-btn').addEventListener('click', initGame);
+ 
+// 初始化游戏
+initGame();
+document.addEventListener('click', hookClick, { capture: true })
